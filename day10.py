@@ -26,8 +26,8 @@ def part1():
 
 def draw(cycle, X):
     if (cycle%40-1) <= X+1 and (cycle%40-1) >= X-1: 
-        print('#', end='')
-    else: print('.', end='')
+        print('□', end='')
+    else: print(' ', end='')
     if cycle % 40 == 0: print()
 
 def part2():
