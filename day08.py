@@ -107,7 +107,7 @@ def number2(trees):
 
 
 def main():
-  file = open('input.txt')
+  file = open('day08-input.txt')
   trees = []
   for line in file:
     trees.append(line.strip())

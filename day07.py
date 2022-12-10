@@ -28,7 +28,7 @@ def recurse(dir):
   return sum
 #############################################
 
-file = open('input.txt')
+file = open('day07-input.txt')
 i = 0
 for line in file:
   line = line.strip().split(' ')

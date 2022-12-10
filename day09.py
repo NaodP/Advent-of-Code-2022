@@ -18,7 +18,7 @@ def plot(rope):
     print('')
     
 def part1():
-    file = open('input.txt')
+    file = open('day09-input.txt')
     H = (0, 0)
     T = (0, 0)
     T_Has_Been = set()
@@ -89,7 +89,7 @@ def part1():
 
 
 def part2():
-  file = open('input.txt')
+  file = open('day09-input.txt')
   rope = [(0,0)]*10
   T_Has_Been = set()
   T_Has_Been.add((0, 0))
