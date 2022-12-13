@@ -33,9 +33,17 @@ def part1(pairs):
     
     return sum
 
-
-def part2():
-    pass
+def part2(pairs):
+    i, j = 1, 2
+    for pair in pairs:
+        if compare(pair[0], [[6]]): 
+            j += 1
+            if compare(pair[0], [[2]]): i += 1
+        if compare(pair[1], [[6]]):
+            j += 1
+            if compare(pair[1], [[2]]): i += 1
+    
+    return i * j
 
 def main():
     file = open('day13-input.txt')
@@ -47,7 +55,7 @@ def main():
         file.readline()
 
     print('Part 1 -', part1(pairs))
-    print('Part 2 -', part2())
+    print('Part 2 -', part2(pairs))
 
 # Start
 main()
