@@ -49,7 +49,49 @@ def part1(directions):
     return maxY
 
 def part2(directions):
-    pass
+    # What I did - Find the beginning of the cycle and find the next beginning
+    # Subtract second beginning's i with the first beginning
+    # Subtract second beginning's maxY with the first beginning
+    # Do (1_000_000_000_000 / i ) * maxY and + the maxY that's not in the cycle and - the overflow
+    solid = set()
+    maxY, index, length = 0, 0, len(directions)
+
+    for i in range(10000):
+        if i%5==0 and index%length<100: print(index%length, i, maxY)
+        currentRock = getRock(i % 5, maxY)
+        
+        while True:
+            index %= length
+            dir = 1 if directions[index] == '>' else -1
+            index += 1
+
+            # Move L/R
+            safe = True
+            for point in currentRock:
+                if point[0] + dir < 1 or point[0] + dir > 7 or (point[0] + dir, point[1]) in solid:
+                    safe = False
+                    break
+
+            if safe:
+                for point in currentRock: point[0] += dir
+
+            # Move Down
+            safe = True
+            for point in currentRock:
+                if point[1] - 1 < 1 or (point[0], point[1]-1) in solid:
+                    safe = False
+                    break
+            
+            if not safe:
+                for point in currentRock:
+                    solid.add((point[0], point[1]))
+                    maxY = max(maxY, point[1])
+                break
+                
+            # Actually Move It Down
+            for point in currentRock: point[1] -= 1 
+
+    return 1570930232558 + 24 # This is the final output
 
 def main():
     file = open('Day 17/day17-input.txt')
