@@ -1,51 +1,87 @@
 # Naod Philemon
 # 12/20/2022
 
-def part1(original):
-    length = len(original)
-    variable = original.copy()
-    positions = [x for x in range(length)]
+class LinkedList:
+    def __init__(self, val):
+        self.prev = None
+        self.val = val
+        self.next = None
+
+def getAllPoints(original):
+    allPoints = []
+    prev = LinkedList(0)
+    first = last = None
+
+    for i, val in enumerate(original):
+        current = LinkedList(val)
+        current.prev = prev
+        prev.next = current
+        prev = current
+
+        if i == 0: first = current
+        if i == len(original)-1: last = current
+        allPoints.append(prev)
     
-    for i in range(length):
-        index = 0
-        current = original[i]
+    first.prev = last
+    last.next = first
 
-        # Find Current Position
-        for j, var in enumerate(variable):
-            if var == current and positions[j] == i:
-                index = j
-                break
-        
-        # Find New Position
-        move = (index + original[i]) % length
+    return allPoints
 
-        # Move It
-        variable.pop(index)    
-        positions.pop(index)
-        
-        if index + original[i] < 0: 
-            dif = int((index + original[i]) / length)
-            variable.insert(move-dif, current)
-            positions.insert(move-dif, i)
-        else: 
-            dif = int((index + original[i]) / length)
-            variable.insert(move+dif, current)
-            positions.insert(move+dif, i)
-        
-        
-    # Find 0
-    for j, var in enumerate(variable):
-        if var == 0:
-            index = j
-            break
+def calculate(allPoints, original, mixNum):
+    for _ in range(mixNum):
+        for point in allPoints:
+            # Find The 0
+            if point.val == 0:
+                start = point
+                continue
 
-    # Sum Values
-    val = variable[(1000+index)%length] + variable[(2000+index)%length] + variable[(3000+index)%length]
+            move = point.val
+            
+            if move < 0:
+                move = -(abs(move) % (len(original) - 1))
+                while move != 0:
+                    point.next.prev = point.prev
+                    point.prev.next = point.next
 
-    return val # Wrong Answer
+                    point.prev = point.prev.prev
+                    point.next.prev.prev = point
+                    point.next = point.next.prev
+                    point.prev.next = point
 
-def part2():
-    pass
+                    move += 1
+            
+            elif move > 0:
+                move = move % (len(original) - 1)
+                while move != 0:
+                    point.next.prev = point.prev
+                    point.prev.next = point.next
+
+                    point.next = point.next.next
+                    point.prev.next.next = point
+                    point.prev = point.prev.next
+                    point.next.prev = point
+
+                    move -= 1
+
+    finalValue = 0
+
+    for i in range(3001):
+        if i % 1000 == 0: finalValue += start.val
+        start = start.next
+    
+    return finalValue
+
+def part1(original):
+    allPoints = getAllPoints(original)
+
+    return calculate(allPoints, original, 1)
+
+def part2(original):
+    original = [x * 811589153 for x in original]
+
+    allPoints = getAllPoints(original)
+    
+    return calculate(allPoints, original, 10)
 
 def main():
     file = open('Day 20/day20-input.txt')
@@ -53,8 +89,8 @@ def main():
 
     for line in file: coordinates.append(int(line))
         
-    print('Part 1 -', part1(coordinates))
-    print('Part 2 -', part2())
+    print('Part 1 -', part1(coordinates)) # Takes Just Under A Min (50 secs)
+    print('Part 2 -', part2(coordinates)) # Takes 10 times as long 😭
 
 # Start
 main()
