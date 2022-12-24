@@ -167,7 +167,7 @@ def main():
         world.append(line)
     
     print('Part 1 -', part1(world, path))
-    print('Part 2 -', part2())
+    print('Part 2 -', part2()) # I'm too lazy to do this lol
 
 # Start
 main()
