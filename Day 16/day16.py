@@ -1,48 +1,59 @@
 # Naod Philemon
 # 12/16/2022
 
-import sys
-sys.setrecursionlimit(5000)
-
-possible = 0
-
-
-def dfs(valves, valve, timeLeft, pressure, opened):
-    # Base Case
-    if len(opened) == possible: timeLeft = 0
-    if timeLeft <= 0: return pressure
+# Find All Non-Zero Valve Connections
+def setup(valves, valid):
+    newValves = {}
     
-    maxPressure = pressure
-    newOpened = opened.copy()
+    for valve in valid:
+        queue = [(valve,0)]
+        seen = {valve}
+        finalDistance = {}
 
-    # Open The Valve
-    if valves[valve]['flow'] != 0 and valve not in newOpened:
-        newOpened.add(valve)
-        timeLeft -= 1 
-        newPressure = pressure + valves[valve]['flow'] * timeLeft
-        maxPressure = newPressure
-        if timeLeft == 0: return maxPressure
+        while queue:
+            current, dist = queue.pop(0)
+            
+            for connection in valves[current][1]:
+                if connection not in seen:
+                    seen.add(connection)
+                    queue.append((connection, dist+1))
+                    if connection == 'AA' or valves[connection][0] > 0:
+                        finalDistance[connection] = dist+1
 
-        for connection in valves[valve]['connections']:
-            maxPressure = max(dfs(valves, connection, timeLeft-1, newPressure, newOpened), maxPressure)
+        newValves[valve] = finalDistance
 
-    # Don't Open The Valve
-    for connection in valves[valve]['connections']:
-        maxPressure = max(dfs(valves, connection, timeLeft-1, pressure, newOpened), maxPressure)
+    return newValves
 
-    return maxPressure
+def part1(oldValves, valid):
+    def dfs(valve, seen, minutes, maxPres):
+        # Base Case
+        if minutes <= 0: return maxPres
+        if len(seen) == len(valid): return maxPres
 
+        seenHere = seen.copy()
+        seenHere.add(valve)
+        ogPres = maxPres
+        for connection in valves[valve]:
+            if connection in seenHere: continue
+            newMins = (minutes-(valves[valve][connection])-1)
+            possible = oldValves[connection][0] * newMins
 
-def part1(valves):
-    return dfs(valves, 'AA', 30, 0, set())
+            maxPres = max(maxPres, dfs(connection, seenHere, newMins, ogPres+possible))
 
-def part2():
+        return maxPres
+
+    valves = setup(oldValves, valid)
+    pressure = dfs('AA', set(), minutes=30, maxPres=0)
+    
+    return pressure
+
+def part2(oldValves, valid):
     pass
 
 def main():
     file = open('Day 16/day16-input.txt')
     valves = {}
-    global possible
+    valid = ['AA']
 
     for line in file:
         line = line.strip().split(';')
@@ -52,15 +63,12 @@ def main():
         valve = left[1]
         flow = int(left[-1][5:])
 
-        if flow != 0: possible += 1
-        
-        valves[valve] = {
-            'flow': flow, 
-            'connections': connections
-        }
+        if flow > 0: valid.append(valve)
 
-    print('Part 1 -', part1(valves)) # NOT SOLVED YET
-    print('Part 2 -', part2())       # NOT SOLVED YET
+        valves[valve] = (flow, connections)
+
+    print('Part 1 -', part1(valves, valid)) # 1728 (No Idea What I Did lol)
+    print('Part 2 -', part2(valves, valid)) # NOT SOLVED YET
 
 # Start
 main()
