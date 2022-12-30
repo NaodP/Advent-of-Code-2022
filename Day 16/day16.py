@@ -48,7 +48,66 @@ def part1(oldValves, valid):
     return pressure
 
 def part2(oldValves, valid):
-    pass
+    def dfs(valve1, valve2, seen, ogMinFirst, ogMinSecond, maxPres):
+        # Base Case
+        if ogMinFirst <= 0 and ogMinSecond <= 0: return maxPres
+        if len(seen) == len(valid): return maxPres
+
+        ogPres = maxPres
+
+        # If Neither Of Us Are Finished
+        if ogMinFirst > 0 and ogMinSecond > 0:
+            for conn1 in valves[valve1]:
+                for conn2 in valves[valve2]:
+                    if conn1 == conn2: continue
+                    if conn1 in seen and conn2 in seen: continue
+                    first = conn1; second = conn2
+                    newSeen = seen.copy()
+                    minFirst = ogMinFirst - (valves[valve1][conn1]) - 1
+                    minSecond = ogMinSecond - (valves[valve2][conn2]) - 1
+                    newPres = ogPres
+                    if minFirst > 0 and conn1 not in seen: 
+                        newPres += (oldValves[conn1][0] * minFirst)
+                        newSeen.add(conn1)
+                    else: first = valve1
+                    if minSecond > 0 and conn2 not in seen: 
+                        newPres += (oldValves[conn2][0] * minSecond)
+                        newSeen.add(conn2)
+                    else: second = valve2
+                    maxPres = max(maxPres, dfs(first, second, newSeen, minFirst, minSecond, newPres))
+
+        # If Elephant Is Finished But I'm Not
+        elif ogMinFirst > 0:
+            for conn in valves[valve1]:
+                if conn not in seen:
+                    newSeen = seen.copy(); newSeen.add(conn)
+                    minFirst = ogMinFirst - (valves[valve1][conn]) - 1
+                    newPres = (oldValves[conn][0] * minFirst) + ogPres
+                    maxPres = max(maxPres, dfs(conn, valve2, newSeen, minFirst, ogMinSecond, newPres))
+
+        # If I'm Finished But Elephant Isn't
+        elif ogMinSecond > 0:
+            for conn in valves[valve2]:
+                if conn not in seen:
+                    newSeen = seen.copy(); newSeen.add(conn)
+                    minSecond = ogMinSecond - (valves[valve2][conn]) - 1
+                    newPres = (oldValves[conn][0] * minSecond) + ogPres
+                    maxPres = max(maxPres, dfs(valve1, conn, newSeen, ogMinFirst, minSecond, newPres))
+     
+        return maxPres
+
+    valves = setup(oldValves, valid)
+    pressure = 0
+    startingConnections = [x for x in valves['AA']]
+
+    for i in range(len(startingConnections)):
+        for j in range(i+1, len(startingConnections)):
+            minFirst = 26 - (valves['AA'][startingConnections[i]]) - 1
+            minSecond = 26 - (valves['AA'][startingConnections[j]]) - 1
+            newPressure = (oldValves[startingConnections[i]][0] * minFirst) + (oldValves[startingConnections[j]][0] * minFirst)
+            pressure = max(pressure, dfs(startingConnections[i], startingConnections[j], {'AA', startingConnections[i], startingConnections[j]}, minFirst, minSecond, maxPres=newPressure))
+
+    return pressure
 
 def main():
     file = open('Day 16/day16-input.txt')
